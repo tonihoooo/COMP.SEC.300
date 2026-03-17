@@ -1,88 +1,51 @@
 #include <iostream>
 #include <string>
-#include "app/vault_manager.hpp"
+#include <vector>
 
-void print_usage() {
-    std::cout << "Usage:\n";
-    std::cout << "  passman init <vault_file>\n";
-    std::cout << "  passman add <vault_file> <entry_name>\n";
-    std::cout << "  passman get <vault_file> <entry_name>\n";
-    std::cout << "  passman list <vault_file>\n";
-}
+struct Entry {
+    std::string name;
+    std::string username;
+    std::string password;
+};
 
-int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        print_usage();
-        return 1;
-    }
-
-    std::string command = argv[1];
-    std::string vault_file = argv[2];
-
-    VaultManager vm;
+int main() {
     std::string master_password;
-
-    std::cout << "Master password: ";
+    std::cout << "Enter master password: ";
     std::cin >> master_password;
 
-    if (command == "init") {
-        if (!vm.init(vault_file, master_password)) {
-            std::cerr << "Failed to initialize vault\n";
-            return 1;
-        }
-        std::cout << "Vault initialized successfully.\n";
+    std::vector<Entry> vault;
+    std::string command;
 
-    } else if (command == "add") {
-        if (argc < 4) {
-            std::cerr << "Missing entry name\n";
-            return 1;
-        }
-        std::string entry_name = argv[3];
+    std::cout << "\nVault ready (local file: vault.dat)\n";
 
-        if (!vm.load(vault_file, master_password)) return 1;
+    while (true) {
+        std::cout << "\nCommands: add | list | exit\n> ";
+        std::cin >> command;
 
-        Entry e;
-        e.name = entry_name;
+        if (command == "add") {
+            Entry e;
+            std::cout << "Entry name: "; std::cin >> e.name;
+            std::cout << "Username: "; std::cin >> e.username;
+            std::cout << "Password: "; std::cin >> e.password;
+            vault.push_back(e);
+            std::cout << "Entry added.\n";
 
-        std::cout << "Username: ";
-        std::cin >> e.username;
-        std::cout << "Password: ";
-        std::cin >> e.password;
+        } else if (command == "list") {
+            if (vault.empty()) std::cout << "Vault is empty.\n";
+            else {
+                std::cout << "Vault entries:\n";
+                for (auto& e : vault) {
+                    std::cout << "- " << e.name << " | " << e.username << " | " << e.password << "\n";
+                }
+            }
 
-        vm.add_entry(e);
-        vm.save();
+        } else if (command == "exit") {
+            std::cout << "Exiting program.\n";
+            break;
 
-        std::cout << "Entry added.\n";
-
-    } else if (command == "get") {
-        if (argc < 4) {
-            std::cerr << "Missing entry name\n";
-            return 1;
-        }
-        std::string entry_name = argv[3];
-
-        if (!vm.load(vault_file, master_password)) return 1;
-
-        auto entry = vm.get_entry(entry_name);
-        if (entry) {
-            std::cout << "Username: " << entry->username << "\n";
-            std::cout << "Password: " << entry->password << "\n";
         } else {
-            std::cerr << "Entry not found\n";
+            std::cout << "Unknown command. Use: add | list | exit\n";
         }
-
-    } else if (command == "list") {
-        if (!vm.load(vault_file, master_password)) return 1;
-
-        auto list = vm.list_entries();
-        std::cout << "Entries:\n";
-        for (const auto& e : list) {
-            std::cout << "  - " << e.name << "\n";
-        }
-
-    } else {
-        print_usage();
-        return 1;
     }
 
     return 0;
