@@ -1,9 +1,9 @@
+#include "storage/file_storage.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
 #include <cstdint>
-#include "storage/file_storage.hpp"
 
 // XOR encryption/decryption
 std::string xor_encrypt_decrypt(const std::string& data, const std::string& key) {

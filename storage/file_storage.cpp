@@ -1,15 +1,8 @@
+#include "../crypto/crypto_manager.hpp"
 #include "file_storage.hpp"
+
 #include <fstream>
 #include <cstdint>
-
-// XOR encryption/decryption (temporary)
-static std::string xor_encrypt_decrypt(const std::string& data, const std::string& key) {
-    std::string result = data;
-    for (size_t i = 0; i < data.size(); ++i) {
-        result[i] ^= key[i % key.size()];
-    }
-    return result;
-}
 
 void FileStorage::save(const std::string& filename,
                        const std::vector<Entry>& vault,
@@ -19,7 +12,7 @@ void FileStorage::save(const std::string& filename,
 
     for (const auto& e : vault) {
         auto write_string = [&ofs, &master_password](const std::string& s) {
-            std::string encrypted = xor_encrypt_decrypt(s, master_password);
+            std::string encrypted = CryptoManager::xor_encrypt_decrypt(s, master_password);
             uint32_t len = encrypted.size();
 
             ofs.write(reinterpret_cast<const char*>(&len), sizeof(len));
@@ -49,7 +42,7 @@ std::vector<Entry> FileStorage::load(const std::string& filename,
             std::string s(len, '\0');
             ifs.read(&s[0], len);
 
-            return xor_encrypt_decrypt(s, master_password);
+            return CryptoManager::xor_encrypt_decrypt(s, master_password);
         };
 
         Entry e;
