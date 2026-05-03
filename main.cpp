@@ -1,18 +1,12 @@
 #include "storage/file_storage.hpp"
+#include "crypto/crypto_manager.hpp"
+#include "app/vault_manager.hpp"
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
 #include <cstdint>
-
-// XOR encryption/decryption
-std::string xor_encrypt_decrypt(const std::string& data, const std::string& key) {
-    std::string result = data;
-    for (size_t i = 0; i < data.size(); ++i) {
-        result[i] ^= key[i % key.size()]; 
-    }
-    return result;
-}
 
 int main() {
     const std::string filename = "vault.dat";
