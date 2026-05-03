@@ -12,7 +12,7 @@ void FileStorage::save(const std::string& filename,
 
     for (const auto& e : vault) {
         auto write_string = [&ofs, &master_password](const std::string& s) {
-            std::string encrypted = CryptoManager::xor_encrypt_decrypt(s, master_password);
+            std::string encrypted = CryptoManager::encrypt(s, master_password);
             uint32_t len = encrypted.size();
 
             ofs.write(reinterpret_cast<const char*>(&len), sizeof(len));
@@ -42,7 +42,7 @@ std::vector<Entry> FileStorage::load(const std::string& filename,
             std::string s(len, '\0');
             ifs.read(&s[0], len);
 
-            return CryptoManager::xor_encrypt_decrypt(s, master_password);
+            return CryptoManager::decrypt(s, master_password);
         };
 
         Entry e;
