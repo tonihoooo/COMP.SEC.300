@@ -32,7 +32,7 @@ int main() {
     std::string command;
 
     while (true) {
-        std::cout << "\nCommands: add | list | exit\n> ";
+        std::cout << "\nCommands: add | list | delete | exit\n> ";
         std::cin >> command;
 
         if (command == "add") {
@@ -64,8 +64,19 @@ int main() {
             std::cout << "Exiting program.\n";
             break;
 
+        } else if (command == "delete") {
+            std::string name;
+            std::cout << "Entry name to delete: ";
+            std::cin >> name;
+
+            if (vm.delete_entry(name)) {
+                vm.save();
+                std::cout << "Entry deleted.\n";
+            } else {
+                std::cout << "Entry not found.\n";
+            }
         } else {
-            std::cout << "Unknown command. Use: add | list | exit\n";
+            std::cout << "Unknown command. Use: add | list | delete | exit\n";
         }
     }
 

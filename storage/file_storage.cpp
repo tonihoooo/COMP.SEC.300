@@ -5,6 +5,9 @@
 #include <cstdint>
 #include <iostream>
 
+static const std::string MAGIC = "MYMGR";
+static const uint8_t VERSION = 1;
+
 static std::string serialize_vault(const std::vector<Entry>& vault) {
     std::string buffer;
 
@@ -65,6 +68,11 @@ void FileStorage::save(const std::string& filename,
     std::string serialized = serialize_vault(vault);
     std::string encrypted = CryptoManager::encrypt(serialized, master_password);
 
+    // Write header
+    ofs.write(MAGIC.c_str(), MAGIC.size());
+    ofs.write(reinterpret_cast<const char*>(&VERSION), sizeof(VERSION));
+
+    // Write encrypted data
     ofs.write(encrypted.data(), encrypted.size());
 }
 
@@ -74,6 +82,23 @@ std::vector<Entry> FileStorage::load(const std::string& filename,
     std::ifstream ifs(filename, std::ios::binary);
     if (!ifs) return {};
 
+    // Read and validate MAGIC
+    std::string magic(MAGIC.size(), '\0');
+    ifs.read(&magic[0], MAGIC.size());
+
+    if (magic != MAGIC) {
+        throw std::runtime_error("Invalid vault file (magic mismatch)");
+    }
+
+    // Read VERSION
+    uint8_t version;
+    ifs.read(reinterpret_cast<char*>(&version), sizeof(version));
+
+    if (version != VERSION) {
+        throw std::runtime_error("Unsupported vault version");
+    }
+
+    // Read remaining encrypted data
     std::string encrypted((std::istreambuf_iterator<char>(ifs)),
                            std::istreambuf_iterator<char>());
 

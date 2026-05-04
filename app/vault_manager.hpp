@@ -10,6 +10,7 @@ public:
     void save();
 
     void add_entry(const Entry& entry);
+    bool delete_entry(const std::string& name);
     std::vector<Entry> list_entries() const;
 
 private:
