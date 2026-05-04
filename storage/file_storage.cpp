@@ -77,11 +77,7 @@ std::vector<Entry> FileStorage::load(const std::string& filename,
     std::string encrypted((std::istreambuf_iterator<char>(ifs)),
                            std::istreambuf_iterator<char>());
 
-    try {
-        std::string decrypted = CryptoManager::decrypt(encrypted, master_password);
-        return deserialize_vault(decrypted);
-    } catch (...) {
-        std::cerr << "Failed to decrypt vault (wrong password or corrupted file)\n";
-        return {};
-    }
+    std::string decrypted = CryptoManager::decrypt(encrypted, master_password);
+
+    return deserialize_vault(decrypted);
 }

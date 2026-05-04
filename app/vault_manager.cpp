@@ -4,8 +4,12 @@ bool VaultManager::load(const std::string& filename, const std::string& master_p
     this->filename = filename;
     this->master_password = master_password;
 
-    vault = FileStorage::load(filename, master_password);
-    return true;
+    try {
+        vault = FileStorage::load(filename, master_password);
+        return true;
+    } catch (const std::exception& e) {
+        return false;
+    }
 }
 
 void VaultManager::save() {

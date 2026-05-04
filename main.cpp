@@ -1,23 +1,33 @@
-#include "storage/file_storage.hpp"
-#include "crypto/crypto_manager.hpp"
 #include "app/vault_manager.hpp"
 
 #include <iostream>
 #include <string>
-#include <vector>
-#include <fstream>
-#include <cstdint>
+#include <sodium.h>
 
 int main() {
+    if (sodium_init() < 0) {
+        std::cerr << "Failed to initialize libsodium\n";
+        return 1;
+    }
+
     const std::string filename = "vault.dat";
-
     std::string master_password;
-    std::cout << "Enter master password: ";
-    std::cin >> master_password;
 
-    // Load vault
-    std::vector<Entry> vault = FileStorage::load(filename, master_password);
-    std::cout << "\nVault loaded (" << vault.size() << " entries).\n";
+    VaultManager vm;
+
+    // 🔐 Password loop (safe UX)
+    while (true) {
+        std::cout << "Enter master password: ";
+        std::cin >> master_password;
+
+        if (vm.load(filename, master_password)) {
+            break;
+        }
+
+        std::cout << "Wrong password or corrupted vault. Try again.\n";
+    }
+
+    std::cout << "\nVault loaded successfully.\n";
 
     std::string command;
 
@@ -30,16 +40,23 @@ int main() {
             std::cout << "Entry name: "; std::cin >> e.name;
             std::cout << "Username: "; std::cin >> e.username;
             std::cout << "Password: "; std::cin >> e.password;
-            vault.push_back(e);
-            FileStorage::save(filename, vault, master_password);
+
+            vm.add_entry(e);
+            vm.save();
+
             std::cout << "Entry added and saved.\n";
 
         } else if (command == "list") {
-            if (vault.empty()) std::cout << "Vault is empty.\n";
-            else {
+            auto entries = vm.list_entries();
+
+            if (entries.empty()) {
+                std::cout << "Vault is empty.\n";
+            } else {
                 std::cout << "Vault entries:\n";
-                for (auto& e : vault) {
-                    std::cout << "- " << e.name << " | " << e.username << " | " << e.password << "\n";
+                for (const auto& e : entries) {
+                    std::cout << "- " << e.name
+                              << " | " << e.username
+                              << " | " << e.password << "\n";
                 }
             }
 
