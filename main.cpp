@@ -15,7 +15,6 @@ int main() {
 
     VaultManager vm;
 
-    // 🔐 Password loop (safe UX)
     while (true) {
         std::cout << "Enter master password: ";
         std::string temp;

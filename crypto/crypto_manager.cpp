@@ -8,11 +8,9 @@ static const size_t SALT_SIZE = crypto_pwhash_SALTBYTES;
 std::string CryptoManager::encrypt(const std::string& plaintext,
                                    const std::string& password) {
 
-    // Generate salt
     unsigned char salt[SALT_SIZE];
     randombytes_buf(salt, sizeof salt);
 
-    // Derive key from password
     unsigned char key[crypto_secretbox_KEYBYTES];
     if (crypto_pwhash(key, sizeof key,
                       password.c_str(), password.size(),
@@ -23,7 +21,6 @@ std::string CryptoManager::encrypt(const std::string& plaintext,
         throw std::runtime_error("Key derivation failed");
     }
 
-    // Generate nonce
     unsigned char nonce[crypto_secretbox_NONCEBYTES];
     randombytes_buf(nonce, sizeof nonce);
 
@@ -36,7 +33,6 @@ std::string CryptoManager::encrypt(const std::string& plaintext,
                           nonce,
                           key);
 
-    // Combine: salt + nonce + ciphertext
     std::string result;
     result.append((char*)salt, sizeof salt);
     result.append((char*)nonce, sizeof nonce);
@@ -57,7 +53,6 @@ std::string CryptoManager::decrypt(const std::string& data,
 
     size_t ciphertext_len = data.size() - SALT_SIZE - crypto_secretbox_NONCEBYTES;
 
-    // Derive key
     unsigned char key[crypto_secretbox_KEYBYTES];
     if (crypto_pwhash(key, sizeof key,
                       password.c_str(), password.size(),
