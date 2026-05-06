@@ -11,16 +11,21 @@ int main() {
     }
 
     const std::string filename = "vault.dat";
-    std::string master_password;
+    std::vector<char> master_password;
 
     VaultManager vm;
 
     // 🔐 Password loop (safe UX)
     while (true) {
         std::cout << "Enter master password: ";
-        std::cin >> master_password;
+        std::string temp;
+        std::cin >> temp;
 
-        if (vm.load(filename, master_password)) {
+        master_password.assign(temp.begin(), temp.end());
+        std::fill(temp.begin(), temp.end(), '\0');
+        std::string password_str(master_password.begin(), master_password.end());
+
+        if (vm.load(filename, password_str)) {
             break;
         }
 
@@ -80,5 +85,6 @@ int main() {
         }
     }
 
+    std::fill(master_password.begin(), master_password.end(), '\0');
     return 0;
 }
