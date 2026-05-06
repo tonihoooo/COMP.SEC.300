@@ -75,7 +75,7 @@ std::string CryptoManager::decrypt(const std::string& data,
                                   ciphertext_len,
                                   nonce,
                                   key) != 0) {
-        throw std::runtime_error("Decryption failed (wrong password or corrupted data)");
+        throw std::runtime_error("AUTHENTICATION_FAILED");
     }
 
     return std::string((char*)plaintext.data(), plaintext.size());
