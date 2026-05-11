@@ -24,7 +24,6 @@ std::string CryptoManager::encrypt(const std::string& plaintext,
     unsigned char nonce[crypto_secretbox_NONCEBYTES];
     randombytes_buf(nonce, sizeof nonce);
 
-    // Encrypt
     std::vector<unsigned char> ciphertext(plaintext.size() + crypto_secretbox_MACBYTES);
 
     crypto_secretbox_easy(ciphertext.data(),

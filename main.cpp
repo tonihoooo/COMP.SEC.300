@@ -27,6 +27,7 @@ int main() {
         if (vm.load(filename, password_str)) {
             break;
         }
+        std::fill(master_password.begin(), master_password.end(), '\0');
 
         std::cout << "Wrong password or corrupted vault. Try again.\n";
     }
@@ -84,6 +85,5 @@ int main() {
         }
     }
 
-    std::fill(master_password.begin(), master_password.end(), '\0');
     return 0;
 }
