@@ -11,7 +11,8 @@ pipeline {
 
         stage('Configure') {
             steps {
-                bat 'cmake -S . -B build'
+                bat 'rmdir /s /q build'
+                bat 'cmake -S . -B build -G "Visual Studio 18 2026"'
             }
         }
 
