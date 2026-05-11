@@ -1,0 +1,49 @@
+name: C++ CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # -------------------------
+      # Install vcpkg
+      # -------------------------
+      - name: Setup vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          .\vcpkg\bootstrap-vcpkg.bat
+
+      # -------------------------
+      # Install libsodium
+      # -------------------------
+      - name: Install libsodium
+        run: |
+          .\vcpkg\vcpkg install libsodium
+
+      # -------------------------
+      # Configure CMake with vcpkg
+      # -------------------------
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build ^
+            -DCMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake ^
+            -DVCPKG_TARGET_TRIPLET=x64-windows
+
+      # -------------------------
+      # Build
+      # -------------------------
+      - name: Build
+        run: cmake --build build --config Debug
+
+      # -------------------------
+      # Run tests
+      # -------------------------
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure

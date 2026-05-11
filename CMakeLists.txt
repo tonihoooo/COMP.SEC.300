@@ -5,7 +5,9 @@ project(MyManager)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# ---- Main executable ----
+# -----------------------
+# Main executable
+# -----------------------
 
 add_executable(MyManager
     main.cpp
@@ -18,20 +20,18 @@ target_include_directories(MyManager PRIVATE
     ${PROJECT_SOURCE_DIR}
 )
 
-# ---- libsodium ----
-# Change this path if your libsodium is elsewhere
+# -----------------------
+# libsodium (CI-safe)
+# -----------------------
 
-target_include_directories(MyManager PRIVATE
-    C:/msys64/mingw64/include
-)
-
-target_link_directories(MyManager PRIVATE
-    C:/msys64/mingw64/lib
-)
+find_package(sodium CONFIG REQUIRED)
 
 target_link_libraries(MyManager PRIVATE sodium)
+target_link_libraries(tests PRIVATE sodium)
 
-# ---- Tests ----
+# -----------------------
+# Tests
+# -----------------------
 
 add_executable(tests
     tests/test_main.cpp
@@ -47,15 +47,10 @@ add_executable(tests
 target_include_directories(tests PRIVATE
     ${PROJECT_SOURCE_DIR}
     tests
-    C:/msys64/mingw64/include
+    ${SODIUM_INCLUDE_DIRS}
 )
 
-target_link_directories(tests PRIVATE
-    C:/msys64/mingw64/lib
-)
-
-target_link_libraries(tests PRIVATE sodium)
+target_link_libraries(tests PRIVATE ${SODIUM_LIBRARIES})
 
 enable_testing()
-
 add_test(NAME VaultTests COMMAND tests)
