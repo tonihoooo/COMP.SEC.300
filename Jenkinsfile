@@ -5,36 +5,25 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                checkout scm
+                git 'https://github.com/tonihoooo/COMP.SEC.300/tree/master''
             }
         }
 
         stage('Configure') {
             steps {
-                bat '''
-                if exist build rmdir /s /q build
-                mkdir build
-                cd build
-                cmake .. -G "MinGW Makefiles"
-                '''
+                sh 'cmake .S -B build'
             }
         }
 
         stage('Build') {
             steps {
-                bat '''
-                cd build
-                cmake --build .
-                '''
+                sh 'cmake --build build'
             }
         }
 
         stage('Test') {
             steps {
-                bat '''
-                cd build
-                tests.exe
-                '''
+                sh 'build/tests.exe'
             }
         }
     }
