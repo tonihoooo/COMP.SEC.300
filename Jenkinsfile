@@ -1,6 +1,13 @@
 pipeline {
     agent any
 
+    environment {
+        C_INCLUDE_PATH = ""
+        CPLUS_INCLUDE_PATH = ""
+        CPATH = ""
+        INCLUDE = ""
+    }
+
     stages {
 
         stage('Checkout') {
@@ -11,18 +18,19 @@ pipeline {
 
         stage('Configure') {
             steps {
-                bat 'rmdir /s /q build'
-                bat 'cmake -S . -B build -G "Visual Studio 18 2026"'
+                bat '''
+                call "C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\Common7\\Tools\\VsDevCmd.bat"
+                cmake -S . -B build -G "Visual Studio 18 2026"
+                '''
             }
         }
 
         stage('Build') {
             steps {
                 bat '''
-                    call "C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\Common7\\Tools\\VsDevCmd.bat"
-                    cmake -S . -B build -G "Visual Studio 18 2026"
-                    cmake --build build --config Debug
-                    '''
+                call "C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\Common7\\Tools\\VsDevCmd.bat"
+                cmake --build build --config Debug
+                '''
             }
         }
 
