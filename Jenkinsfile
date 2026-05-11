@@ -11,19 +11,19 @@ pipeline {
 
         stage('Configure') {
             steps {
-                bat 'cmake .S -B build'
+                bat 'cmake -S . -B build'
             }
         }
 
         stage('Build') {
             steps {
-                bat 'cmake --build build'
+                bat 'cmake --build build --config Debug'
             }
         }
 
         stage('Test') {
             steps {
-                bat 'build/tests.exe'
+                bat 'ctest --test-dir build -C Debug --output-on-failure'
             }
         }
     }
