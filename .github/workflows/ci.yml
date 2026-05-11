@@ -8,7 +8,13 @@ jobs:
   build:
     runs-on: windows-latest
 
+    env:
+      VCPKG_ROOT: ${{ github.workspace }}\vcpkg
+
     steps:
+      # -------------------------
+      # Checkout repository
+      # -------------------------
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -16,34 +22,42 @@ jobs:
       # Install vcpkg
       # -------------------------
       - name: Setup vcpkg
+        shell: cmd
         run: |
-          git clone https://github.com/microsoft/vcpkg.git
-          .\vcpkg\bootstrap-vcpkg.bat
+          git clone https://github.com/microsoft/vcpkg.git %VCPKG_ROOT%
+          cd %VCPKG_ROOT%
+          bootstrap-vcpkg.bat
 
       # -------------------------
-      # Install libsodium
+      # Install dependencies
       # -------------------------
       - name: Install libsodium
+        shell: cmd
         run: |
-          .\vcpkg\vcpkg install libsodium
+          %VCPKG_ROOT%\vcpkg install libsodium:x64-windows
 
       # -------------------------
-      # Configure CMake with vcpkg
+      # Configure CMake
       # -------------------------
       - name: Configure CMake
+        shell: cmd
         run: |
           cmake -S . -B build ^
-            -DCMAKE_TOOLCHAIN_FILE=.\vcpkg\scripts\buildsystems\vcpkg.cmake ^
+            -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ^
             -DVCPKG_TARGET_TRIPLET=x64-windows
 
       # -------------------------
-      # Build
+      # Build project
       # -------------------------
       - name: Build
-        run: cmake --build build --config Debug
+        shell: cmd
+        run: |
+          cmake --build build --config Debug
 
       # -------------------------
-      # Run tests
+      # Run tests (Catch2 / CTest)
       # -------------------------
       - name: Run tests
-        run: ctest --test-dir build --output-on-failure
+        shell: cmd
+        run: |
+          ctest --test-dir build --output-on-failure
