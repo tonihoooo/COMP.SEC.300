@@ -3,3 +3,6 @@
 
 # Ignore data files
 *.dat
+
+# Ignore build files
+/build/
