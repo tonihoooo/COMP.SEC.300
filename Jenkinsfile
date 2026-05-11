@@ -5,7 +5,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git 'https://github.com/tonihoooo/COMP.SEC.300/tree/master''
+                git 'https://github.com/tonihoooo/COMP.SEC.300.git''
             }
         }
 
