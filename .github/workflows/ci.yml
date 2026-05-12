@@ -75,3 +75,4 @@ jobs:
             -Dsonar.projectKey=tonihoooo_COMP.SEC.300
             -Dsonar.organization=tonihoooo
             -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.cfamily.compile-commands=build/compile_commands.json
