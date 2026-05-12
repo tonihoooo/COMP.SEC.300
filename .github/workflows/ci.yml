@@ -40,10 +40,10 @@ jobs:
       # Configure CMake
       # -------------------------
       - name: Configure CMake
-        shell: cmd
         run: |
           cmake -S . -B build ^
             -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ^
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ^
             -DVCPKG_TARGET_TRIPLET=x64-windows
 
       # -------------------------
