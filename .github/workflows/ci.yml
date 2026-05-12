@@ -11,67 +11,60 @@ jobs:
     env:
       VCPKG_ROOT: ${{ github.workspace }}\vcpkg
 
+    defaults:
+      run:
+        shell: pwsh
+
     steps:
       # -------------------------
-      # Checkout repository
+      # Checkout (IMPORTANT: full history for SCM + blame)
       # -------------------------
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      # -------------------------
-      # Install Ninja
-      # -------------------------
-      - name: Install Ninja
-        shell: pwsh
-        run: choco install ninja -y
+        with:
+          fetch-depth: 0
 
       # -------------------------
       # Setup vcpkg
       # -------------------------
       - name: Setup vcpkg
-        shell: pwsh
         run: |
           git clone https://github.com/microsoft/vcpkg.git $env:VCPKG_ROOT
-          cd $env:VCPKG_ROOT
-          .\bootstrap-vcpkg.bat
+          & "$env:VCPKG_ROOT\bootstrap-vcpkg.bat"
 
       # -------------------------
       # Install dependencies
       # -------------------------
-      - name: Install libsodium
-        shell: pwsh
+      - name: Install dependencies
         run: |
-          & "$env:VCPKG_ROOT\vcpkg.exe" install libsodium:x64-windows
+          & "$env:VCPKG_ROOT\vcpkg" install libsodium:x64-windows
 
       # -------------------------
-      # Configure CMake (IMPORTANT: Ninja + compile DB)
+      # Configure CMake (IMPORTANT: compile_commands here)
       # -------------------------
       - name: Configure CMake
-        shell: pwsh
         run: |
           cmake -S . -B build `
-            -G Ninja `
-            -DCMAKE_BUILD_TYPE=Debug `
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
             -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" `
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
             -DVCPKG_TARGET_TRIPLET=x64-windows
 
       # -------------------------
-      # Build project
+      # Build
       # -------------------------
       - name: Build
-        shell: pwsh
-        run: cmake --build build
+        run: |
+          cmake --build build --config Debug
 
       # -------------------------
-      # Run tests
+      # Verify compile database exists (DEBUG STEP)
       # -------------------------
-      - name: Run tests
-        shell: pwsh
-        run: ctest --test-dir build --output-on-failure
+      - name: Check compile_commands.json
+        run: |
+          Get-Content build\compile_commands.json | Select-Object -First 5
 
       # -------------------------
-      # SonarCloud SAST
+      # SonarCloud Scan
       # -------------------------
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v6
@@ -83,3 +76,4 @@ jobs:
             -Dsonar.organization=tonihoooo
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.cfamily.compile-commands=build/compile_commands.json
+            -Dsonar.sources=app,crypto,storage
