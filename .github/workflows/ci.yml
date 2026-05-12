@@ -22,35 +22,36 @@ jobs:
       # Setup vcpkg
       # -------------------------
       - name: Setup vcpkg
-        shell: cmd
+        shell: pwsh
         run: |
-          git clone https://github.com/microsoft/vcpkg.git %VCPKG_ROOT%
-          cd %VCPKG_ROOT%
-          bootstrap-vcpkg.bat
+          git clone https://github.com/microsoft/vcpkg.git "$env:VCPKG_ROOT"
+          cd "$env:VCPKG_ROOT"
+          .\bootstrap-vcpkg.bat
 
       # -------------------------
       # Install dependencies
       # -------------------------
       - name: Install libsodium
-        shell: cmd
+        shell: pwsh
         run: |
-          %VCPKG_ROOT%\vcpkg install libsodium:x64-windows
+          & "$env:VCPKG_ROOT\vcpkg.exe" install libsodium:x64-windows
 
       # -------------------------
       # Configure CMake
       # -------------------------
       - name: Configure CMake
+        shell: pwsh
         run: |
-          cmake -S . -B build ^
-            -DCMAKE_TOOLCHAIN_FILE=%VCPKG_ROOT%\scripts\buildsystems\vcpkg.cmake ^
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ^
+          cmake -S . -B build `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake" `
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON `
             -DVCPKG_TARGET_TRIPLET=x64-windows
 
       # -------------------------
       # Build project
       # -------------------------
       - name: Build
-        shell: cmd
+        shell: pwsh
         run: |
           cmake --build build --config Debug
 
@@ -58,7 +59,7 @@ jobs:
       # Run tests
       # -------------------------
       - name: Run tests
-        shell: cmd
+        shell: pwsh
         run: |
           ctest --test-dir build -C Debug --output-on-failure
 
@@ -73,4 +74,4 @@ jobs:
           args: >
             -Dsonar.projectKey=tonihoooo_COMP.SEC.300
             -Dsonar.organization=tonihoooo
-            -Dsonar.host.url=https://sonarcloud.io 
+            -Dsonar.host.url=https://sonarcloud.io
