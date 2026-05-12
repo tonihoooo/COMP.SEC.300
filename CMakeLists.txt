@@ -21,13 +21,13 @@ target_include_directories(MyManager PRIVATE
 )
 
 # -----------------------
-# libsodium (CI-safe)
+# libsodium
 # -----------------------
 
-find_package(sodium CONFIG REQUIRED)
+find_package(unofficial-sodium CONFIG REQUIRED)
 
-target_link_libraries(MyManager PRIVATE sodium)
-target_link_libraries(tests PRIVATE sodium)
+target_link_libraries(MyManager PRIVATE unofficial-sodium::sodium)
+target_link_libraries(tests PRIVATE unofficial-sodium::sodium)
 
 # -----------------------
 # Tests
