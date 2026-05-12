@@ -21,15 +21,6 @@ target_include_directories(MyManager PRIVATE
 )
 
 # -----------------------
-# libsodium
-# -----------------------
-
-find_package(unofficial-sodium CONFIG REQUIRED)
-
-target_link_libraries(MyManager PRIVATE unofficial-sodium::sodium)
-target_link_libraries(tests PRIVATE unofficial-sodium::sodium)
-
-# -----------------------
 # Tests
 # -----------------------
 
@@ -47,10 +38,21 @@ add_executable(tests
 target_include_directories(tests PRIVATE
     ${PROJECT_SOURCE_DIR}
     tests
-    ${SODIUM_INCLUDE_DIRS}
 )
 
-target_link_libraries(tests PRIVATE ${SODIUM_LIBRARIES})
+# -----------------------
+# libsodium
+# -----------------------
+
+find_package(unofficial-sodium CONFIG REQUIRED)
+
+target_link_libraries(MyManager PRIVATE unofficial-sodium::sodium)
+target_link_libraries(tests PRIVATE unofficial-sodium::sodium)
+
+# -----------------------
+# Testing
+# -----------------------
 
 enable_testing()
+
 add_test(NAME VaultTests COMMAND tests)
