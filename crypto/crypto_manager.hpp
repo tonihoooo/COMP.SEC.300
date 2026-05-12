@@ -3,9 +3,9 @@
 
 class CryptoManager {
 public:
-    static std::string encrypt(const std::string& plaintext,
+    static std::string encrypt(const std::string_view plaintext,
                                const std::string& password);
 
-    static std::string decrypt(const std::string& ciphertext,
+    static std::string decrypt(const std::string_view ciphertext,
                                const std::string& password);
 };
