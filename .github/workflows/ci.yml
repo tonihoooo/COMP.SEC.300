@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v4
 
       # -------------------------
-      # Install vcpkg
+      # Setup vcpkg
       # -------------------------
       - name: Setup vcpkg
         shell: cmd
@@ -55,9 +55,22 @@ jobs:
           cmake --build build --config Debug
 
       # -------------------------
-      # Run tests (Catch2 / CTest)
+      # Run tests
       # -------------------------
       - name: Run tests
         shell: cmd
         run: |
           ctest --test-dir build -C Debug --output-on-failure
+
+      # -------------------------
+      # SonarCloud SAST
+      # -------------------------
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=tonihoooo_COMP.SEC.300
+            -Dsonar.organization=tonihoooo
+            -Dsonar.host.url=https://sonarcloud.io
