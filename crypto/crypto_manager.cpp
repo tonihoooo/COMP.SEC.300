@@ -12,8 +12,8 @@ std::string CryptoManager::encrypt(const std::string_view plaintext,
     randombytes_buf(salt, sizeof salt);
 
     // Derive key from password
-    unsigned char key[crypto_secretbox_KEYBYTES];
-    if (crypto_pwhash(key, sizeof key,
+    std::string key(crypto_secretbox_KEYBYTES, '\0');
+    if (crypto_pwhash((unsigned char*)key.data(), key.size(),
                       password.c_str(), password.size(),
                       salt,
                       crypto_pwhash_OPSLIMIT_INTERACTIVE,
@@ -33,7 +33,7 @@ std::string CryptoManager::encrypt(const std::string_view plaintext,
                           (const unsigned char*)plaintext.data(),
                           plaintext.size(),
                           nonce,
-                          key);
+                          (const unsigned char*)key.data());
 
     std::string result;
     result.append((char*)salt, sizeof salt);
@@ -59,8 +59,8 @@ std::string CryptoManager::decrypt(const std::string_view data,
     size_t ciphertext_len = data.size() - SALT_SIZE - crypto_secretbox_NONCEBYTES;
 
     // Derive key from password
-    unsigned char key[crypto_secretbox_KEYBYTES];
-    if (crypto_pwhash(key, sizeof key,
+    std::string key(crypto_secretbox_KEYBYTES, '\0');
+    if (crypto_pwhash((unsigned char*)key.data(), key.size(),
                       password.c_str(), password.size(),
                       salt,
                       crypto_pwhash_OPSLIMIT_INTERACTIVE,
@@ -76,7 +76,7 @@ std::string CryptoManager::decrypt(const std::string_view data,
                                   ciphertext,
                                   ciphertext_len,
                                   nonce,
-                                  key) != 0) {
+                                  (const unsigned char*)key.data()) != 0) {
         throw std::runtime_error("AUTHENTICATION_FAILED");
     }
 
