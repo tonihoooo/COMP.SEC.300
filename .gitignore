@@ -1,6 +1,3 @@
-# Ignore compiled executables
-*.exe
-
 # Ignore data files
 *.dat
 
