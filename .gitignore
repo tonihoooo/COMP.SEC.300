@@ -6,3 +6,4 @@
 
 # Ignore temporary files
 ~$cumentation.docx
+*.tmp
