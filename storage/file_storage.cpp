@@ -8,6 +8,13 @@
 static const std::string MAGIC = "MYMGR";
 static const uint8_t VERSION = 1;
 
+/**
+ * Serializes the vault entries into a binary format. 
+ * The format is: [entry_count][entry1_name_len][entry1_name][entry1_username_len][entry1_username][entry1_password_len][entry1_password]...
+ * 
+ * @param vault The vector of entries to serialize.
+ * @return A string containing the serialized vault data.
+ */
 static std::string serialize_vault(const std::vector<Entry>& vault) {
     std::string buffer;
 
@@ -29,6 +36,12 @@ static std::string serialize_vault(const std::vector<Entry>& vault) {
     return buffer;
 }
 
+/**
+ * Deserializes the vault data from the binary format produced by serialize_vault.
+ * 
+ * @param buffer The string containing the serialized vault data.
+ * @return A vector of entries reconstructed from the serialized data.
+ */
 static std::vector<Entry> deserialize_vault(const std::string& buffer) {
     std::vector<Entry> vault;
     size_t offset = 0;
@@ -59,6 +72,14 @@ static std::vector<Entry> deserialize_vault(const std::string& buffer) {
     return vault;
 }
 
+/**
+ * Saves the vault to a file. The vault is serialized and encrypted using the master password before being written to disk. 
+ * The file format includes a header with a magic string and version number for validation.
+ * 
+ * @param filename The name of the file to save the vault to.
+ * @param vault The vector of entries to save.
+ * @param master_password The password to encrypt the vault with.
+ */
 void FileStorage::save(const std::string& filename,
                        const std::vector<Entry>& vault,
                        const std::string& master_password) {
@@ -68,21 +89,24 @@ void FileStorage::save(const std::string& filename,
     std::string serialized = serialize_vault(vault);
     std::string encrypted = CryptoManager::encrypt(serialized, master_password);
 
-    // Write header
     ofs.write(MAGIC.c_str(), MAGIC.size());
     ofs.write(reinterpret_cast<const char*>(&VERSION), sizeof(VERSION));
-
-    // Write encrypted data
     ofs.write(encrypted.data(), encrypted.size());
 }
 
+/**
+ * Loads the vault from a file. The file is read and decrypted using the master password, then deserialized into a vector of entries.
+ * 
+ * @param filename The name of the file to load the vault from.
+ * @param master_password The password to decrypt the vault with.
+ * @return A vector of entries reconstructed from the loaded and decrypted data.
+ */
 std::vector<Entry> FileStorage::load(const std::string& filename,
                                      const std::string& master_password) {
 
     std::ifstream ifs(filename, std::ios::binary);
     if (!ifs) return {};
 
-    // Read and validate MAGIC
     std::string magic(MAGIC.size(), '\0');
     ifs.read(&magic[0], MAGIC.size());
 
@@ -90,7 +114,6 @@ std::vector<Entry> FileStorage::load(const std::string& filename,
         throw std::runtime_error("Invalid vault file (magic mismatch)");
     }
 
-    // Read VERSION
     uint8_t version;
     ifs.read(reinterpret_cast<char*>(&version), sizeof(version));
 
@@ -98,7 +121,6 @@ std::vector<Entry> FileStorage::load(const std::string& filename,
         throw std::runtime_error("Unsupported vault version");
     }
 
-    // Read remaining encrypted data
     std::string encrypted((std::istreambuf_iterator<char>(ifs)),
                            std::istreambuf_iterator<char>());
 

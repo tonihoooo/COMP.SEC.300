@@ -5,13 +5,19 @@
 
 static const size_t SALT_SIZE = crypto_pwhash_SALTBYTES;
 
+/**
+ * Encrypts the given plaintext using the provided password. The output format is: [salt][nonce][ciphertext].
+ * 
+ * @param plaintext The plaintext to encrypt.
+ * @param password The password to derive the encryption key from.
+ * @return The encrypted data as a string.
+ * @throws std::runtime_error if key derivation or encryption fails.
+ */
 std::string CryptoManager::encrypt(const std::string_view plaintext,
                                    const std::string& password) {
-    // Generate random salt
     unsigned char salt[SALT_SIZE];
     randombytes_buf(salt, sizeof salt);
 
-    // Derive key from password
     std::string key(crypto_secretbox_KEYBYTES, '\0');
     if (crypto_pwhash((unsigned char*)key.data(), key.size(),
                       password.c_str(), password.size(),
@@ -22,13 +28,11 @@ std::string CryptoManager::encrypt(const std::string_view plaintext,
         throw std::runtime_error("Key derivation failed");
     }
 
-    // Generate random nonce
     unsigned char nonce[crypto_secretbox_NONCEBYTES];
     randombytes_buf(nonce, sizeof nonce);
 
     std::vector<unsigned char> ciphertext(plaintext.size() + crypto_secretbox_MACBYTES);
 
-    // Encrypt the plaintext
     crypto_secretbox_easy(ciphertext.data(),
                           (const unsigned char*)plaintext.data(),
                           plaintext.size(),
@@ -43,22 +47,26 @@ std::string CryptoManager::encrypt(const std::string_view plaintext,
     return result;
 }
 
+/**
+ * Decrypts the given ciphertext using the provided password. The input format is expected to be: [salt][nonce][ciphertext].
+ * 
+ * @param data The encrypted data to decrypt.
+ * @param password The password to derive the decryption key from.
+ * @return The decrypted plaintext as a string.
+ * @throws std::runtime_error if key derivation or decryption fails.
+ */
 std::string CryptoManager::decrypt(const std::string_view data,
                                    const std::string& password) {
 
-    // Validate input size
     if (data.size() < SALT_SIZE + crypto_secretbox_NONCEBYTES)
         throw std::runtime_error("Invalid data");
 
-    // Extract salt, nonce, and ciphertext
     const unsigned char* salt = (const unsigned char*)data.data();
     const unsigned char* nonce = (const unsigned char*)(data.data() + SALT_SIZE);
     const unsigned char* ciphertext = (const unsigned char*)(data.data() + SALT_SIZE + crypto_secretbox_NONCEBYTES);
 
-    // Calculate ciphertext length
     size_t ciphertext_len = data.size() - SALT_SIZE - crypto_secretbox_NONCEBYTES;
 
-    // Derive key from password
     std::string key(crypto_secretbox_KEYBYTES, '\0');
     if (crypto_pwhash((unsigned char*)key.data(), key.size(),
                       password.c_str(), password.size(),
@@ -69,7 +77,6 @@ std::string CryptoManager::decrypt(const std::string_view data,
         throw std::runtime_error("Key derivation failed");
     }
 
-    // Decrypt the ciphertext
     std::vector<unsigned char> plaintext(ciphertext_len - crypto_secretbox_MACBYTES);
 
     if (crypto_secretbox_open_easy(plaintext.data(),

@@ -1,6 +1,9 @@
 #include "catch.hpp"
 #include "../storage/file_storage.hpp"
 
+/**
+ * Tests the save and load functionality of the FileStorage class.
+ */
 TEST_CASE("Save and load vault", "[storage]") {
     std::vector<Entry> vault = {
         {"github", "user", "pass"}

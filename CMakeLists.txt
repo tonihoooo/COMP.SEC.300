@@ -25,7 +25,6 @@ target_include_directories(MyManager PRIVATE
 # -----------------------
 
 add_executable(tests
-    tests/test_main.cpp
     tests/test_crypto.cpp
     tests/test_storage.cpp
     tests/test_vault.cpp

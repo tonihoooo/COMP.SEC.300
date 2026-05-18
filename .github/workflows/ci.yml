@@ -17,7 +17,7 @@ jobs:
 
     steps:
       # -------------------------
-      # Checkout (IMPORTANT: full history for SCM + blame)
+      # Checkout 
       # -------------------------
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
           & "$env:VCPKG_ROOT\vcpkg" install libsodium:x64-windows
 
       # -------------------------
-      # Configure CMake (IMPORTANT: compile_commands here)
+      # Configure CMake
       # -------------------------
       - name: Configure CMake
         run: |
@@ -57,7 +57,7 @@ jobs:
           cmake --build build --config Debug
 
       # -------------------------
-      # Verify compile database exists (DEBUG STEP)
+      # Verify compile database exists
       # -------------------------
       - name: Check compile_commands.json
         run: |

@@ -1,6 +1,9 @@
 #include "catch.hpp"
 #include "../app/vault_manager.hpp"
 
+/**
+ * Tests the basic operations of the VaultManager class, including loading, adding entries, listing entries, and deleting entries.
+ */
 TEST_CASE("Vault basic operations", "[vault]") {
     VaultManager vm;
 
